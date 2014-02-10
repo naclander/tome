@@ -26,8 +26,71 @@ for def, e in pairs(game.state:getWorldArtifacts()) do
 	print("Importing "..e.name.." into world artifacts")
 end
 
-
 -- This file describes artifacts not bound to a special location, they can be found anywhere
+
+newEntity{ base = "BASE_GEM", 
+	power_source = {arcane=true},
+	unique = true,
+	unided_name = "windy gem",
+	name = "Windborne Azurite", subtype = "blue",
+	color = colors.BLUE, image = "object/sapphire.png",
+	level_range = {18, 40},
+	desc = [[Air currents swirl around this bright blue jewel.]],
+	rarity = 240,
+	cost = 200,
+	identified = false,
+	material_level = 4,
+	wielder = {
+		inc_stats = {[Stats.STAT_DEX] = 10, [Stats.STAT_CUN] = 10 },
+		inc_damage = {[DamageType.LIGHTNING] = 20 },
+		cancel_damage_chance = 10, -- add to tooltip
+		damage_affinity={
+			[DamageType.LIGHTNING] = 20,
+		},
+		movement_speed = 0.2,
+	},
+	imbue_powers = {
+		inc_stats = {[Stats.STAT_DEX] = 8, [Stats.STAT_CUN] = 8 },
+		inc_damage = {[DamageType.LIGHTNING] = 20 },
+		cancel_damage_chance = 8,
+		damage_affinity={
+			[DamageType.LIGHTNING] = 20,
+		},
+		movement_speed = 0.15,
+	},
+	wielder = {
+		inc_stats = {[Stats.STAT_DEX] = 8, [Stats.STAT_CUN] = 8 },
+		inc_damage = {[DamageType.LIGHTNING] = 20 },
+		cancel_damage_chance = 8,
+		damage_affinity={
+			[DamageType.LIGHTNING] = 20,
+		},
+		movement_speed = 0.15,
+	},
+}
+
+-- Low base values because you can stack affinity and resist
+-- The 3rd type is pretty meaningless balance-wise.  Magic debuffs hardly matter.  The real advantage is the affinity.
+newEntity{ base = "BASE_INFUSION",
+	name = "Primal Infusion", unique=true, image = "object/artifact/tree_of_life.png",
+	desc = [[This wild infusion has evolved.]],
+	unided_name = "pulsing infusion",
+	level_range = {15, 40},
+	rarity = 300,
+	cost = 300,
+	material_level = 3,
+
+	inscription_kind = "protect",
+	inscription_data = {
+		cooldown = 20,
+		dur = 6,
+		power = 10,
+		use_stat_mod = 0.1, 
+		what = {physical=true, mental=true, magical=true},
+	},
+	inscription_talent = "INFUSION:_PRIMAL",
+}
+
 newEntity{ base = "BASE_STAFF",
 	power_source = {arcane=true},
 	unique = true,
@@ -3835,7 +3898,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 		combat_mindpower=8,
 	},
 		max_power = 35, power_regen = 1,
-	use_power = { name = "call an antimagic pillar", power = 35,
+	use_power = { name = "call an antimagic pillar, but silence yourself", power = 35,
 		use = function(self, who)
 			local x, y = util.findFreeGrid(who.x, who.y, 5, true, {[engine.Map.ACTOR]=true})
 			if not x then
@@ -3853,10 +3916,11 @@ newEntity{ base = "BASE_TOOL_MISC",
 				blood_color = colors.GREEN,
 				display = "T", color=colors.GREEN,
 				life_rating=18,
+				combat_dam = 40,
 				combat = {
 					dam=resolvers.rngavg(50,60),
 					atk=resolvers.rngavg(50,75), apr=25,
-					dammod={wil=1.1}, physcrit = 10,
+					dammod={wil=1.2}, physcrit = 10,
 					damtype=engine.DamageType.SLIME,
 				},
 				level_range = {1, nil}, exp_worth = 0,
@@ -3870,7 +3934,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 				size_category = 5,
 				blind=1,
 				esp_all=1,
-				resists={[engine.DamageType.BLIGHT] = 40, [engine.DamageType.ARCANE] = 40, [engine.DamageType.NATURE] = 70},
+				resists={all = 15, [engine.DamageType.BLIGHT] = 40, [engine.DamageType.ARCANE] = 40, [engine.DamageType.NATURE] = 70},
 				no_breath = 1,
 				cant_be_moved = 1,
 				stone_immune = 1,
@@ -3882,10 +3946,10 @@ newEntity{ base = "BASE_TOOL_MISC",
 				stun_immune = 1,
 				blind_immune = 1,
 				cut_immune = 1,
-				knockback_resist,
+				knockback_resist=1,
 				combat_mentalresist=50,
 				combat_spellresist=100,
-				on_act = function(self) self:project({type="ball", range=0, radius=5, selffire=false}, self.x, self.y, engine.DamageType.SILENCE, {dur=2, power_check=self:combatMindpower()}) end,
+				on_act = function(self) self:project({type="ball", range=0, radius=5, friendlyfire=false}, self.x, self.y, engine.DamageType.SILENCE, {dur=2, power_check=self:combatMindpower()}) end,
 				resolvers.talents{
 					[Talents.T_RESOLVE]={base=3, every=6},
 					[Talents.T_MANA_CLASH]={base=3, every=5},
@@ -3908,6 +3972,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 				title="Summon",
 				orders = {target=true, leash=true, anchor=true, talents=true},
 			})
+			who:setEffect(who.EFF_SILENCED, 5, {})
 			return {id=true, used=true}
 		end
 	},
@@ -5274,7 +5339,7 @@ newEntity{ base = "BASE_AMULET",
 	rarity = 220,
 	cost = 350,
 	material_level = 5,
-	special_desc = function(self) return "Gives all your cold damage a 20% chance to freeze the target, and allows 20% of your damage to ignore ice blocks." end,
+	special_desc = function(self) return "Gives all your cold damage a 20% chance to freeze the target." end,
 	wielder = {
 		combat_spellpower=12,
 		inc_damage={
@@ -5897,7 +5962,7 @@ newEntity{ base = "BASE_SHIELD",
 	special_desc = function(self) return "When you block an attack, there is a 30% chance of petrifying the attacker." end,
 	special_combat = {
 		dam = 40,
-		block = 100,
+		block = 180,
 		physcrit = 5,
 		dammod = {str=1},
 	},
@@ -5920,11 +5985,10 @@ newEntity{ base = "BASE_SHIELD",
 	end,
 }
 
--- Disrupt the backline by attacking the frontline
--- Effect works better fighting in the open
--- Damage stats are pretty bad, not entirely sure they need to be
--- Arcane if necessary, ideally nature scaling off dex.  Dex is thematic with wind.
--- Aesthetic Themes:  Blue, windy, lightning, storm, speed
+-- No longer hits your own projectiles
+-- Hopefully fixed LUA errors with DamageType require
+-- Significant rescaling.  Base damage cut by 50%, crit by 5%.  The reason these hilariously bad numbers happened was derping and not accounting for the awesomeness of the 100% dex scaling.  APR is still extremely high.
+-- Proc chance is now 100% up from 25%.  No matter how I test this--even at 100% and 500% global action speed--it is often a pain in the ass to get procs just to test.  This is supposed to be one of the main features of the item. 
 newEntity{ base = "BASE_KNIFE", --Shibari's #1
 	power_source = {nature=true},
 	unique = true,
@@ -5938,24 +6002,31 @@ newEntity{ base = "BASE_KNIFE", --Shibari's #1
 	color=colors.BLUE,
 	require = { stat = { dex=30}},
 	combat = {
-		dam = 30,
+		dam = 15,
 		apr = 20,
-		physcrit = 18,
+		physcrit = 10,
 		dammod = {dex=1},
-		special_on_hit = {desc="25% chance for lightning to strike and destroy any projectiles in a radius of 10, dealing damage and stunning enemies around the projectile.", on_kill=1, fct=function(combat, who, target)
-			if not rng.percent(25) then return end
+		special_on_hit = {desc="Causes lightning to strike and destroy any projectiles in a radius of 10 dealing damage and dazing enemies in a radius of 5 around it.", on_kill=1, fct=function(combat, who, target)
 			local grids = core.fov.circle_grids(who.x, who.y, 10, true)
 			for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
 				local i = 0
 				local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
-				while p do											   
+				while p do
+					local DamageType = require "engine.DamageType" -- I don't entirely follow why this is necessary
+					if p.src and (p.src == who) then return end -- Keep Arcane Blade procs from hitting them since the projectile is still on top of them.
+					if p.name then 
+						game.logPlayer(who, "#GREEN#Lightning strikes the " .. p.name .. "!")
+					else
+						game.logPlayer(who, "#GREEN#Shantiz strikes down a projectile!")
+					end
+					
 					p:terminate(x, y)
 					game.level:removeEntity(p, true)
 					p.dead = true
-					game.level.map:particleEmitter(x, y, 5, "ball_lightning_beam", {radius=5, tx=x, ty=y}) -- I'm terrible with graphical stuff but I thought I'd at least try?
+					game.level.map:particleEmitter(x, y, 5, "ball_lightning_beam", {radius=5, tx=x, ty=y})
 				   
 					local tg = {type="ball", radius=5, selffire=false}
-					local dam = who:mindCrit(30+(2*who:getDex())) -- generous because of the bad damage type, spell or phys crit would both be fine
+					local dam = 4*who:getDex() -- no more crit or base damage.  no real reason, just like it better.
 
 					who:project(tg, x, y, DamageType.LIGHTNING, dam)
 				   
@@ -5973,9 +6044,411 @@ newEntity{ base = "BASE_KNIFE", --Shibari's #1
 		},
 	},
 	wielder = {
-		inc_stats = { [Stats.STAT_DEX] = 12 },
-		slow_projectiles = 40, -- synergy with proc
-		quick_weapon_swap = 1, -- thematic, also makes this more useful when caught in the open.  In general I like this mechanic and would like to see more of it.
+		inc_stats = { [Stats.STAT_DEX] = 20 },
+		slow_projectiles = 40, 
+		quick_weapon_swap = 1, 
+	},
+}
+
+newEntity{ base = "BASE_KNIFE",
+	power_source = {technique=true},
+	unique = true,
+	name = "Swordbreaker", image = "object/artifact/swordbreaker.png",
+	unided_name = "hooked blade",
+	desc = [[This ordinary blade is made of fine, sturdy voratun and outfitted with jagged hooks along the edge. This simple appearance belies a great power - the hooked maw of this dagger broke many a blade and the stride of many would-be warriors.]],
+	level_range = {20, 30},
+	rarity = 250,
+	require = { stat = { dex=10, cun=10 }, },
+	cost = 300,
+	material_level = 3,
+	special_desc = function(self) return "Can block like a shield, potentially disarming the enemy." end,
+	combat = {
+		dam = 25,
+		apr = 20,
+		physcrit = 15,
+		physspeed = 0.9,
+		dammod = {dex=0.5,cun=0.5},
+		special_on_crit = {desc="Breaks enemy weapon.", fct=function(combat, who, target)
+			target:setEffect(target.EFF_SUNDER_ARMS, 5, {power=5+(who:combatPhysicalpower()*0.33), apply_power=who:combatPhysicalpower()})
+		end},
+	},
+	wielder = {
+		combat_def = 15,
+		disarm_immune=0.5,
+		combat_physresist = 15,
+		inc_stats = { 
+			[Stats.STAT_DEX] = 8, 
+			[Stats.STAT_CUN] = 8, 
+		},
+		combat_armor_hardiness = 20,
+		learn_talent = { [Talents.T_DAGGER_BLOCK] = 1, },
+	},
+}
+
+newEntity{ base = "BASE_SHIELD",
+	power_source = {arcane=true},
+	unique = true,
+	name = "Shieldsmaiden", image = "object/artifact/shieldmaiden.png",
+	unided_name = "icy shield",
+	desc = [["Myths tell of shieldsmaidens, a tribe of warrior women from the northern wastes of Maj'Eyal. Their martial prowess and beauty drew the fascination of swaths of admirers, yet all unrequited. So began the saying, that a shieldsmaidens heart is as cold and unbreakable as her shield."]],
+	color = colors.BROWN,
+	level_range = {36, 48},
+	rarity = 270,
+	require = { stat = { str=28 }, },
+	cost = 400,
+	material_level = 5,
+	metallic = false,
+	special_desc = function(self) return "Granted talent can block up to 1 instance of damage each 10 turns." end,
+	special_combat = {
+		dam = 48,
+		block = 150,
+		physcrit = 8,
+		dammod = {str=1},
+		damtype = DamageType.ICE,
+		talent_on_hit = { [Talents.T_ICE_SHARDS] = {level=3, chance=15} },
+	},
+	wielder = {
+		combat_armor = 20,
+		combat_def = 5,
+		combat_def_ranged = 12,
+		fatigue = 10,
+		learn_talent = { [Talents.T_BLOCK] = 4, [Talents.T_SHIELDSMAIDEN_AURA] = 1,  },
+		resists = { [DamageType.COLD] = 25, [DamageType.FIRE] = 25,},
+	},
+}
+
+-- Thanks to Naghyal's Beholder code for the basic socket skeleton
+newEntity{ base = "BASE_GREATMAUL",
+	power_source = {arcane=true}, -- Should really make this only arcane for some gems
+	unique = true,
+	color = colors.BLUE,
+	name = "Tirakai's Maul",
+	desc = [[This massive hammer is formed from a thick mass of strange crystalline growths. In the side of the hammer itself you see an empty slot; it looks like a gem of your own could easily fit inside it.]],
+	gemDesc = "None", -- Defined by the elemental properties and used by special_desc
+	special_desc = function(self)
+	-- You'll want to color this and such
+		if not self.Gem then return ("No gem") end
+		return ("%s: %s"):format(self.Gem.name:capitalize(), self.gemDesc or ("Write a description for this gem's properties!"))
+	end,	
+	cost = 1000,
+	material_level = 1, -- Changes to gem material level on socket
+	evel_range = {1, 15},
+	rarity = 280,
+	combat = {
+		dam = 10,
+		apr = 7,
+		physcrit = 4,
+		damrange=1.3,
+		dammod = {str=1.2},
+	},
+	max_power = 1, power_regen = 1,
+	use_power = { name = "imbue the hammer with a gem of your choice", power = 0,
+		use = function(self, who)
+			local DamageType = require "engine.DamageType"
+			local Stats = require "engine.interface.ActorStats"
+			local d
+			d = who:showInventory("Use which gem?", who:getInven("INVEN"), function(gem) return gem.type == "gem" and gem.imbue_powers and gem.material_level end, 
+				function(gem, gem_item)
+				who:onTakeoff(self)
+				local name_old=self.name
+				local old_hotkey
+				for i, v in pairs(who.hotkey) do
+					if v[2]==name_old then
+						old_hotkey=i
+					end
+				end
+				
+				-- Recycle the old gem
+				local old_gem=self.Gem
+				if old_gem then
+					who:addObject(who:getInven("INVEN"), old_gem)
+					game.logPlayer(who, "You remove your %s.", old_gem:getName{do_colour=true, no_count=true})
+				end
+				
+				if gem then
+	
+					-- The Blank Slate.  This is a horrible method of changing modes, but it is the easiest to avoid fucking up.  This doesn't do much better than just making a static table for every element but its much easier to work with.
+					self.Gem = nil
+					self.Gem = gem
+					self.gemDesc = "Describe all the goddamn colors.  NOW."
+					
+					self.sentient = false
+					self.act = mod.class.Object.act
+					
+					self.talent_on_spell = nil
+					
+					self.material_level=gem.material_level
+					local scalingFactor = self.material_level 
+					
+					self.combat = {
+						dam = (14 * scalingFactor),
+						apr = (3 * scalingFactor),
+						physcrit = (2.5 * scalingFactor),
+						dammod = {str=1.2},
+						damrange = 1.3,
+					}
+							
+					self.wielder = {
+						inc_stats = {[Stats.STAT_MAG] = (2 * scalingFactor), [Stats.STAT_CUN] = (2 * scalingFactor), [Stats.STAT_DEX] = (2 * scalingFactor),},
+					}
+					
+					who:removeObject(who:getInven("INVEN"), gem_item)
+
+					-- Each element merges its effect into the combat/wielder tables (or anything else) after the base stats are scaled
+					-- You can modify damage and such here too but you should probably make static tables instead of merging
+					if gem.subtype =="black" then -- Acid
+						self.combat.damtype = DamageType.ACID
+						table.mergeAdd(self.wielder, {inc_damage = { [DamageType.ACID] = 4 * scalingFactor} }, true)
+						
+						self.combat.burst_on_crit = {[DamageType.ACID_DISARM] = 12 * scalingFactor,}
+						self.gemDesc = "Acid"
+					end
+					if gem.subtype =="blue" then  -- Lightning
+						self.combat.damtype = DamageType.LIGHTNING
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.LIGHTNING] = 4 * scalingFactor} 
+						
+							}, true)
+						self.combat.burst_on_crit = {[DamageType.LIGHTNING_DAZE] = 12 * scalingFactor,}
+						self.gemDesc = "Lightning"
+					end
+					if gem.subtype =="green" then  -- Nature
+						self.combat.damtype = DamageType.NATURE
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.NATURE] = 4 * scalingFactor} 
+							
+							}, true)
+						self.combat.burst_on_crit = {[DamageType.SPYDRIC_POISON] = 12 * scalingFactor,}
+						self.gemDesc = "Nature"
+					end
+					if gem.subtype =="red" then  -- Fire					
+						self.combat.damtype = DamageType.FIRE
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.FIRE] = 4 * scalingFactor}, 
+						}, true)
+						self.combat.burst_on_crit = {[DamageType.FLAMESHOCK] = 12 * scalingFactor,}
+						self.gemDesc = "Fire"
+					end
+					if gem.subtype =="violet" then -- Arcane
+						self.combat.damtype = DamageType.ARCANE
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.ARCANE] = 4 * scalingFactor} 
+							
+						}, true)
+						self.combat.burst_on_crit = {[DamageType.ARCANE_SILENCE] = 12 * scalingFactor,}
+						self.gemDesc = "Arcane"
+					end
+					if gem.subtype =="white" then  -- Cold
+						self.combat.damtype = DamageType.COLD
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.COLD] = 4 * scalingFactor} 
+							
+						}, true)
+						self.combat.burst_on_crit = {[DamageType.ICE] = 12 * scalingFactor,}
+						self.gemDesc = "Cold"
+					end
+					if gem.subtype =="yellow" then -- Light
+						self.combat.damtype = DamageType.LIGHT
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.LIGHT] = 4 * scalingFactor} 
+							
+						}, true)	
+						self.combat.burst_on_crit = {[DamageType.LIGHT_BLIND] = 12 * scalingFactor,}
+						self.gemDesc = "Light"
+					end
+					if gem.subtype == "multi-hued"  then -- Some but not all artifacts, if you want to do artifact specific effects make conditionals by name, don't use this
+						table.mergeAdd(self.combat, {convert_damage = {[DamageType.COLD] = 25, [DamageType.FIRE] = 25, [DamageType.LIGHTNING] = 25, [DamageType.ARCANE] = 25,} }, true)
+						table.mergeAdd(self.wielder, {
+							inc_damage = { all = 2 * scalingFactor},
+							resists_pen = { all = 2 * scalingFactor},
+							}, true)	
+							self.gemDesc = "Unique"							
+					end
+					if gem.subtype == "demonic"  then -- Goedalath Rock
+						self.combat.damtype = DamageType.SHADOWFLAME
+						table.mergeAdd(self.wielder, {
+							inc_damage = { [DamageType.FIRE] = 3 * scalingFactor, [DamageType.DARKNESS] = 3 * scalingFactor,},
+							resists_pen = { all = 2 * scalingFactor},
+							}, true)	
+							self.gemDesc = "Demonic"							
+					end
+					game.logPlayer(who, "You imbue your %s with %s.", self:getName{do_colour=true, no_count=true}, gem:getName{do_colour=true, no_count=true})
+
+					--self.name = (gem.name .. " of Divinity")
+					
+					table.mergeAdd(self.wielder, gem.imbue_powers, true)
+					
+				end
+				if gem.talent_on_spell then
+					self.talent_on_spell = self.talent_on_spell or {}
+					table.append(self.talent_on_spell, gem.talent_on_spell)
+				end
+				who:onWear(self)
+				for i, v in pairs(who.hotkey) do
+					if v[2]==name_old then
+						v[2]=self.name
+					end
+					if v[2]==self.name and old_hotkey and i~=old_hotkey then
+						who.hotkey[i] = nil
+					end
+				end
+				d.used_talent=true
+				game:unregisterDialog(d)
+				return true
+			end)
+			return {id=true, used=true}
+		end
+	},
+	on_wear = function(self, who)
+
+		return true
+	end,
+	wielder = {
+	-- Stats only from gems
+	},
+}
+
+newEntity{ base = "BASE_GLOVES", define_as = "SET_GLOVE_DESTROYER",
+	power_source = {arcane=true, technique=true},
+	unique = true,
+	name = "Fist of the Destroyer", color = colors.RED, image = "object/artifact/fist_of_the_destroyer.png",
+	unided_name = "vile gauntlets",
+	desc = [[These terrible looking gloves glow with untold power.]],
+	level_range = {40, 50},
+	rarity = 300,
+	cost = 800,
+	material_level = 5,
+	special_desc = function(self)
+		local num=4
+		if self.set_complete then
+			num=6
+		end
+		return ("Increases all damage by %d%% of current vim \nCurrent Bonus: %d%%"):format(num, num*0.01*(game.player:getVim() or 0)) 
+	end,
+	wielder = {
+		inc_stats = { [Stats.STAT_STR] = 9, [Stats.STAT_MAG] = 9, [Stats.STAT_CUN] = 3, },
+		demonblood_dam=0.04,
+		max_vim = 25,
+		combat_def = 8,
+		stun_immune = 0.2,
+		talents_types_mastery = { ["corruption/shadowflame"] = 0.2, ["corruption/vim"] = 0.2,},
+		combat = {
+			dam = 35,
+			apr = 15,
+			physcrit = 10,
+			physspeed = 0,
+			dammod = {dex=0.4, str=-0.6, cun=0.4, mag=0.2,},
+			damrange = 0.3,
+			talent_on_hit = { T_DRAIN = {level=2, chance=8}, T_SOUL_ROT = {level=3, chance=12}, T_BLOOD_GRASP = {level=3, chance=10}},
+		},
+	},
+	max_power = 12, power_regen = 1,
+	use_talent = { id = Talents.T_DARKFIRE, level = 5, power = 12 },
+	set_list = { {"define_as", "SET_ARMOR_MASOCHISM"} },
+	on_set_complete = function(self, who)
+		game.logPlayer(who, "#STEEL_BLUE#The fist and the mangled clothing glow ominously!")
+		self:specialSetAdd({"wielder","demonblood_dam"}, 0.02)
+		self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE] = 15, [engine.DamageType.DARKNESS] = 15, all = 5 })
+	end,
+	on_set_broken = function(self, who)
+		game.logPlayer(who, "#STEEL_BLUE#The ominous glow dies down.")
+	end,
+}
+
+newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SET_ARMOR_MASOCHISM",
+	power_source = {arcane=true, technique=true},
+	unique = true,
+	name = "Masochism", color = colors.RED, image = "object/artifact/masochism.png",
+	unided_name = "mangled clothing",
+	desc = [[Stolen flesh,
+	Stolen pain,
+	To give it up,
+	Is to live again.]],
+	level_range = {40, 50},
+	rarity = 300,
+	cost = 800,
+	material_level = 5,
+	special_desc = function(self)
+		local num=7
+		if self.set_complete then
+			num=10
+		end
+		return ("Reduces all damage by %d%% of current vim or 50%% of the damage, whichever is lower; but at the cost of vim equal to 5%% of the damage blocked. \nCurrent Bonus: %d"):format(num, num*0.01*(game.player:getVim() or 0)) 
+	end,
+	wielder = {
+		inc_stats = {[Stats.STAT_MAG] = 9, [Stats.STAT_CUN] = 3, },
+		combat_spellpower = 10,
+		demonblood_def=0.07,
+		max_vim = 25,
+		disease_immune = 1,
+		combat_physresist = 10,
+		combat_mentalresist = 10,
+		combat_spellresist = 10,
+		on_melee_hit={[DamageType.DRAIN_VIM] = 25},
+		melee_project={[DamageType.DRAIN_VIM] = 25},
+		talents_types_mastery = { ["corruption/sanguisuge"] = 0.2, ["corruption/blood"] = 0.2,},
+	},
+	max_power = 12, power_regen = 1,
+	use_talent = { id = Talents.T_BLOOD_GRASP, level = 5, power = 12 },
+	set_list = { {"define_as", "SET_GLOVE_DESTROYER"} },
+	on_set_complete = function(self, who)
+		self:specialSetAdd({"wielder","demonblood_def"}, 0.03)
+		self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE] = 15, [engine.DamageType.DARKNESS] = 15, all = 5 })
+	end,
+	on_set_broken = function(self, who)
+	end,
+}
+
+newEntity{ base = "BASE_GREATMAUL",
+	power_source = {technique=true},
+	unique = true,
+	name = "Obliterator", color = colors.UMBER, image = "object/artifact/obliterator.png",
+	unided_name = "titanic maul",
+	desc = [[This massive hammer strikes with an impact that could shatter bones.]],
+	level_range = {23, 30},
+	rarity = 270,
+	require = { stat = { str=40 }, },
+	cost = 250,
+	material_level = 3,
+	combat = {
+		dam = 48,
+		apr = 10,
+		physcrit = 0,
+		dammod = {str=1.2},
+		crushing_blow=1,
+	},
+	wielder = {
+		combat_critical_power = 10,
+	},
+}
+
+newEntity{ base = "BASE_HELM",
+	power_source = {technique=true},
+	unique = true,
+	name = "Yaldan Baoth", image = "object/artifact/yaldan_baoth.png",
+	unided_name = "obscuring helm",
+	desc = [[The golden bascinet crown, affiliated to Veluca of Yaldan. King of the mythical city of Yaldan, that was struck from the face of Eyal by the arrogance of its people. Lone survivor of his kin, he spent his last years wandering the early world, teaching man to stand against the darkness. With his dying words, "Fear no evil", the crown was passed onto his successor.]],
+	level_range = {28, 39,},
+	rarity = 240,
+	cost = 700,
+	material_level = 4,
+	wielder = {
+		combat_armor = 6,
+		fatigue = 4,
+		resist_unseen = 25,
+		sight = -2,
+		inc_stats = { [Stats.STAT_WIL] = 10, [Stats.STAT_CON] = 7, },
+		inc_damage={
+			[DamageType.LIGHT] = 10,
+		},
+		resists={
+			[DamageType.LIGHT] = 10,
+			[DamageType.DARKNESS] = 15,
+		},
+		resists_cap={
+			[DamageType.DARKNESS] = 10,
+		},
+		blind_fight = 1,
 	},
 }
 --[=[
