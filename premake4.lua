@@ -17,7 +17,7 @@ solution "TEngine"
 		"src/physfs",
 		"src/zlib",
 		"src/bzip2",
-		"/opt/SDL-2.0/include/SDL2",
+		"/usr/include/SDL2",
 		"/usr/include/GL",
 	}
 	if _OPTIONS.lua == "default" then includedirs{"src/lua"}
@@ -53,8 +53,7 @@ configuration "macosx"
 configuration "Debug"
 	defines { }
 	flags { "Symbols" }
-	buildoptions { "-ggdb" }
-	buildoptions { "-O3" }
+	buildoptions { "-g" }
 	targetdir "bin/Debug"
 	if _OPTIONS.luaassert then defines {"LUA_USE_APICHECK"} end
 	if _OPTIONS.pedantic then buildoptions { "-Wall" } end

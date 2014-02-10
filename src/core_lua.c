@@ -613,11 +613,16 @@ static int sdl_new_font(lua_State *L)
 
 	SDL_RWops *src = PHYSFSRWOPS_openRead(name);
 	if (!src)
-	{
-		return luaL_error(L, "could not load font: %s (%d)", name, size);
+ 	{
+		char *sysfont = NULL;
+		asprintf(&sysfont, "/usr/share/fonts/TTF/%s", basename(name));
+		*f = TTF_OpenFont(sysfont, size);
+		free(sysfont);
+ 	}
+	else{
+		*f = TTF_OpenFontRW(src, TRUE, size);
 	}
 
-	*f = TTF_OpenFontRW(src, TRUE, size);
 
 	if (!*f)
 	{

@@ -887,8 +887,9 @@ end
 
 function _M:isDonator(s)
 	s = s or 1
-	if core.steam then return true end
-	if not self.auth or not tonumber(self.auth.donated) or tonumber(self.auth.donated) < s then return false else return true end
+	--if core.steam then return true end
+	--if not self.auth or not tonumber(self.auth.donated) or tonumber(self.auth.donated) < s then return false else return true end
+	return true
 end
 
 function _M:allowDLC(dlc)
