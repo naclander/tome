@@ -1,7 +1,7 @@
 tome
 ====
 
-Clone of the Tales of Maj'Eyal git repository with un locked "donator" features. 
+Clone of the Tales of Maj'Eyal git repository with unlocked "donator" features. 
 
 
 Tales of Maj'Eyal (Tome) is a fantastic game, but unfortunatley certain 
