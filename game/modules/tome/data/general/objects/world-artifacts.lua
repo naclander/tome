@@ -73,7 +73,7 @@ newEntity{ base = "BASE_INFUSION",
 
 	inscription_kind = "protect",
 	inscription_data = {
-		cooldown = 20,
+		cooldown = 18,
 		dur = 6,
 		power = 10,
 		use_stat_mod = 0.1, 
@@ -804,7 +804,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 	wielder = {
 		combat_def = 10,
 		combat_armor = 15,
-		combat_armor_hardiness = 40,
+		combat_armor_hardiness = 30,
 		inc_stats = { [Stats.STAT_CON] = 5, [Stats.STAT_WIL] = 4, },
 		combat_mindpower = 10,
 		combat_mindcrit = 5,
@@ -1548,7 +1548,7 @@ newEntity{ base = "BASE_MACE",
 			o.combat.damtype = b.damtype
 			o.wielder = b.wielder
 			who:onWear(o, true)
-			game.logSeen(who, "#GOLD#Ureslak's Femur glows and shimers!")
+			game.logSeen(who, "#GOLD#Ureslak's Femur glows and shimmers!")
 		end },
 	},
 	ureslak_bonuses = {
@@ -5055,7 +5055,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	name = "The Untouchable", color = colors.BLUE, image = "object/artifact/the_untouchable.png",
 	unided_name = "tough leather coat",
 	desc = [[This rugged jacket is the subject of many a rural legend. 
-Some say it was fashioned by an adventurous mage turned rogue, in times before the spellblaze, but was since lost.
+Some say it was fashioned by an adventurous mage turned rogue, in times before the Spellblaze, but was since lost.
 All manner of shady gamblers have since claimed to have worn it at one point or another. To fail, but live, is what it means to be untouchable, they said.]],
 	level_range = {20, 30},
 	rarity = 200,
