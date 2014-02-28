@@ -25,7 +25,6 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 
 
-
 newEffect{
 	name = "DELIRIOUS_CONCUSSION", image = "talents/slippery_moss.png",
 	desc = "Concussion",
@@ -318,7 +317,7 @@ newEffect{
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
-			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and t.no_energy ~= true then tids[#tids+1] = t end
+			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and util.getval(t.no_energy, self, t) ~= true then tids[#tids+1] = t end
 		end
 		for i = 1, 4 do
 			local t = rng.tableRemove(tids)
@@ -354,7 +353,7 @@ newEffect{
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
-			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and t.no_energy ~= true then tids[#tids+1] = t end
+			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and util.getval(t.no_energy, self, t) ~= true then tids[#tids+1] = t end
 		end
 		for i = 1, 4 do
 			local t = rng.tableRemove(tids)
