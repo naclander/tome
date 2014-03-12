@@ -567,14 +567,16 @@ function _M:playerFOV()
 		self:computeFOV(self.sight or 10, "block_sight", function(x, y, dx, dy, sqdist)
 			game.level.map:apply(x, y, fovdist[sqdist])
 		end, true, false, true)
+		local lradius = self.lite
+		if self.radiance_aura and lradius < self.radiance_aura then lradius = self.radiance_aura end
 		if self.lite <= 0 then game.level.map:applyLite(self.x, self.y)
-		else self:computeFOV(self.lite + bonus, "block_sight", function(x, y, dx, dy, sqdist) game.level.map:applyLite(x, y) end, true, true, true) end
+		else self:computeFOV(lradius + bonus, "block_sight", function(x, y, dx, dy, sqdist) game.level.map:applyLite(x, y) end, true, true, true) end
 
 		-- For each entity, generate lite
 		local uid, e = next(game.level.entities)
 		while uid do
-			if e ~= self and e.lite and e.lite > 0 and e.computeFOV then
-				e:computeFOV(e.lite, "block_sight", function(x, y, dx, dy, sqdist) game.level.map:applyExtraLite(x, y, fovdist[sqdist]) end, true, true)
+			if e ~= self and ((e.lite and e.lite > 0) or (e.radiance_aura and e.radiance_aura > 0)) and e.computeFOV then
+				e:computeFOV(math.max(e.lite or 0, e.radiance_aura or 0), "block_sight", function(x, y, dx, dy, sqdist) game.level.map:applyExtraLite(x, y, fovdist[sqdist]) end, true, true)
 			end
 			uid, e = next(game.level.entities, uid)
 		end

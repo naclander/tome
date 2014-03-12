@@ -400,7 +400,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 	elseif self:checkEvasion(target) then
 		evaded = true
 		self:logCombat(target, "#Target# evades #Source#.")
-	elseif self.turn_procs.auto_melee_hit or (self:checkHit(atk, def) and (self:canSee(target) or self:attr("blind_fight") or rng.chance(3))) then
+	elseif self.turn_procs.auto_melee_hit or (self:checkHit(atk, def) and (self:canSee(target) or self:attr("blind_fight") or target:attr("blind_fighted") or rng.chance(3))) then
 		local pres = util.bound(target:combatArmorHardiness() / 100, 0, 1)
 		if target.knowTalent and target:hasEffect(target.EFF_DUAL_WEAPON_DEFENSE) then
 			local deflect = math.min(dam, target:callTalent(target.T_DUAL_WEAPON_DEFENSE, "doDeflect"))
@@ -2251,26 +2251,36 @@ end
 -- Starts the grapple
 function _M:startGrapple(target)
 	-- pulls boosted grapple effect from the clinch talent if known
+	local grappledParam = {src = self, apply_power = 1, silence = 0, power = 1, slow = 0, reduction = 0}
+	local grappleParam = {sharePct = 0, drain = 0, trgt = target }
+	local duration = 5
 	if self:knowTalent(self.T_CLINCH) then
 		local t = self:getTalentFromId(self.T_CLINCH)
-		power = t.getPower(self, t)
+		if self:knowTalent(self.T_CRUSHING_HOLD) then
+			local t2 = self:getTalentFromId(self.T_CRUSHING_HOLD)
+			grappledParam = t2.getBonusEffects(self, t2) -- get the 4 bonus parameters first
+		end
+		local power = self:physicalCrit(t.getPower(self, t), nil, target, self:combatAttack(), target:combatDefense())
+		grappledParam["power"] = power -- damage/turn set by Clinch
 		duration = t.getDuration(self, t)
-		hitbonus = self:getTalentLevel(t)/2
-	else
-		power = 5
-		duration = 4
-		hitbonus = 0
+
+		grappleParam["drain"] = t.getDrain(self, t) -- stamina/turn set by Clinch
+		grappleParam["sharePct"] = t.getSharePct(self, t) -- damage shared with grappled set by Clinch
+
 	end
+	-- oh for the love of god why didn't I rewrite this entire structure
+	grappledParam["src"] = self
+	grappledParam["apply_power"] = self:combatPhysicalpower()
 	-- Breaks the grapple before reapplying
 	if self:hasEffect(self.EFF_GRAPPLING) then
 		self:removeEffect(self.EFF_GRAPPLING, true)
-		target:setEffect(target.EFF_GRAPPLED, duration, {src=self, power=power}, true)
-		self:setEffect(self.EFF_GRAPPLING, duration, {trgt=target}, true)
+		target:setEffect(target.EFF_GRAPPLED, duration, grappledParam, true)
+		self:setEffect(self.EFF_GRAPPLING, duration, grappleParam, true)
 		return true
 	elseif target:canBe("pin") then
-		target:setEffect(target.EFF_GRAPPLED, duration, {src=self, power=power, apply_power=self:combatPhysicalpower()})
+		target:setEffect(target.EFF_GRAPPLED, duration, grappledParam)
 		target:crossTierEffect(target.EFF_GRAPPLED, self:combatPhysicalpower())
-		self:setEffect(self.EFF_GRAPPLING, duration, {trgt=target})
+		self:setEffect(self.EFF_GRAPPLING, duration, grappleParam)
 		return true
 	else
 		game.logSeen(target, "%s resists the grapple!", target.name:capitalize())
